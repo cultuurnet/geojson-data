@@ -87,17 +87,17 @@ You should see something like:
     
 Before we split the files, we should create a subdirectory to store them in:
 
-	mkdir split/gem
+	mkdir -p geojson/gem
     
 Now we can run `geojsplit` and tell it to write the resulting files to this directory:
 
-	geojsplit -a 0 -v -k "NAAM" -o split/gem Refgem4326.json
+	geojsplit -a 0 -v -k "NAAM" -o geojson/gem Refgem4326.json
     
 `-k "NAAM"` tells `geojsplit` to use each municipalities' name for their respective filename.
 
 You should now have 308 files, one for each municipality, in the `split/gem` directory:
 
-	ls -l split/gem
+	ls -l geojson/gem
     
 	-rw-r--r--  1 bert  staff  195010 Feb 10 11:52 Aalst_x.geojson
     -rw-r--r--  1 bert  staff  151930 Feb 10 11:52 Aalter_x.geojson
@@ -109,31 +109,38 @@ You should now have 308 files, one for each municipality, in the `split/gem` dir
 
 Unfortunately `geojsplit` adds a `_x` suffix to the filenames of our `.geojson` files, and this can not be disabled.
 
-To remove this suffix on macOS, we'll use the [npm renamer](https://www.npmjs.com/package/renamer) utility.
+To remove this suffix, run the following command:
 
-Alternatively, on Linux you could use the built-in `rename` utility.
-
-Install the utility globally:
-
-	npm install -g renamer
-    
-Do a dry run to make sure everything would be renamed as expected:
-
-	renamer -f "_x.geojson" -r ".geojson" split/gem/*.geojson --dry-run
-    
-If everything looks okay, re-run without the `--dry-run` option:
-
-	renamer -f "_x.geojson" -r ".geojson" split/gem/*.geojson
+	for i in geojson/gem/*_x.geojson; do 
+		mv -v ${i} ${i%_x.geojson}.geojson; 
+	done;
     
 You should now have a list of files like this:
 
-	ls -l split/gem
+	ls -l geojson/gem
     
 	-rw-r--r--  1 bert  staff  195010 Feb 10 11:52 Aalst.geojson
     -rw-r--r--  1 bert  staff  151930 Feb 10 11:52 Aalter.geojson
     -rw-r--r--  1 bert  staff  167454 Feb 10 11:52 Aarschot.geojson
     -rw-r--r--  1 bert  staff  100494 Feb 10 11:52 Aartselaar.geojson
 	...
+	
+## Slugifying the filenames
+
+We want each filename to be the ID of the final document when indexed by ElasticSearch.
+
+To slugify the filename and add a prefix, run the following command:
+
+	cd geojson/gem;
+	for file in *.geojson; do
+  		if [ -f "$file" ]; then
+	   		ext=${file##*.}
+   			name=${file%.*}
+	   		slug=$(echo "$name"| iconv -t ascii//TRANSLIT | sed -E s/[^a-zA-Z0-9]+/-/g | sed -E s/^-+\|-+$//g | tr A-Z a-z)
+   			mv -v $file "gem-$slug.$ext"
+	  	fi
+	done
+	cd ../../;
     
 ## Converting each file from a FeatureCollection to a single Feature
 
@@ -149,7 +156,9 @@ Verify that the utility is installed by running:
     
 Now run the following command to modify each individual `.geojson` file and remove the `FeatureCollection` wrapper:
 
-	for file in split/gem/*.geojson; do jq '.features[0]' $file | awk 'BEGIN{RS="";getline<"-";print>ARGV[1]}' $file; done;
+	for file in geojson/gem/*.geojson; do 
+		jq '.features[0]' $file | awk 'BEGIN{RS="";getline<"-";print>ARGV[1]}' $file; 
+	done;
 
 ## Validation
 
@@ -161,7 +170,7 @@ Install the utility globally:
     
 Validate all `.geojson` files in the `split/gem` directory using:
 
-	find split/gem -name "*.geojson" -print0 | xargs -0 gjv
+	find geojson/gem -name "*.geojson" -print0 | xargs -0 gjv
     
 The command will stop as soon as an invalid file is detected. The identify the file, look for the `NAAM` key in the output of the error. If all files are valid, you will just see a list of messages like this:
 
