@@ -2,7 +2,7 @@
 
 The UDB3 ElasticSearch index for geoshapes expects the files to be structured in a specific way.
 
-Before we convert the geodata from `.geojson` to `.json` files that ElasticSearch can index, make sure you empty the existing `elasticsearch` directory first.
+Before you convert the geodata from `.geojson` to `.json` files that ElasticSearch can index, make sure you empty the existing `elasticsearch` directory first.
 
 	rm -R elasticsearch/*;
 
