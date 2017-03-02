@@ -13,7 +13,7 @@ for file in $files; do
     json_file=$without_extension.json;
     
     touch $json_file;
-	  jq '. | {location:.geometry}' $file > $json_file;
+    jq '. | {location:.geometry}' $file > $json_file;
     
     rm $file;
     
