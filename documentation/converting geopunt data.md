@@ -33,6 +33,10 @@ On macOS, the preferred method of installation is via Homebrew:
     
 One of the dependencies of `gdal` is the `gcc` compiler, which will be built from source by Homebrew. This may take a while (depending on your system, **upwards of an hour**), which is why it's useful to run the install command in verbose mode (`-v`) to make sure the installation is not stuck when it is in fact compiling `gcc`.
 
+If you have Xcode installed you can avoid building `gcc` from source by making sure the Xcode command line tools are installed.
+
+	xcode-select --install
+
 Once completed, make sure that `ogr2ogr` is installed successfully:
 
 	ogr2ogr --help
