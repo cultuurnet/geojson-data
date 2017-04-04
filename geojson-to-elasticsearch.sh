@@ -3,10 +3,9 @@
 ROOT_DIR="$(cd "$(dirname ${BASH_SOURCE[0]})" && pwd)"
 REQUIRED_COMMANDS=(jq)
 
-for cmd in "${REQUIRED_COMMANDS[@]}"
-do
+for cmd in ${REQUIRED_COMMANDS[@]}; do
     command -v ${cmd} > /dev/null 2>&1 || \
-    { echo >&2 "I require ${cmd} but it's not installed. Aborting."; exit 1 }
+    { echo >&2 "I require ${cmd} but it's not installed. Aborting."; exit 1; }
 done
 
 geojson_dir=${1:-${ROOT_DIR}/geojson}

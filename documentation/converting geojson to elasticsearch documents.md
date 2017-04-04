@@ -13,8 +13,4 @@ Before you convert the geodata from `.geojson` to `.json` files that ElasticSear
 
 To actually convert the files, use the shell script located in the root of this repository:
 
-	./geojson-to-elasticsearch.sh
-	
-It may be necessary to make it executable first:
-
-	chmod +x ./geojson-to-elasticsearch.sh
+	sh ./geojson-to-elasticsearch.sh
